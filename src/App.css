@@ -1,0 +1,43 @@
+body {
+  padding: 50px;
+  background-color: rgb(46, 116, 150);
+  font-family: sans-serif;
+}
+#container {
+  display: flex;
+  justify-content: center;
+}
+#header{
+  text-align: center;
+  font-size: 35px;
+  color: aliceblue;
+  font-family: 'Times New Roman', Times, serif;
+}
+li {
+  text-align: center;
+  list-style: none;
+}
+#todoContainer{
+  text-align: center;
+
+}
+h2{
+  display: inline-block;
+  color: aliceblue;
+  font-family: 'Times New Roman', Times, serif;
+  user-select: none;
+}
+.complete{
+  text-decoration: line-through;
+}
+.button{
+  margin-left: 10px;
+}
+ .button:hover {
+  background-color: #003399;
+  border: 2px solid #003399;
+  border-radius: 10%;
+  cursor: pointer;
+  font-family: 'Times New Roman', Times, serif;
+}
+
