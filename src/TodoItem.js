@@ -1,15 +1,16 @@
 import React, { Component } from 'react'
-import { Link } from 'react-router-dom';
 
 export default class TodoItem extends Component {
     render() {
         const { todo } = this.props;
+        const { complete } = this.props.todo;
 
-        return (<li key={todo.id}>
+        
+        
+        return (<li key={todo.id} className={ complete ? 'complete' : ''}>
             <div className="todo-text">
-            <h2>{todo.task}</h2>
-            <p>{todo.complete}</p>
-            {/* <Link key={todo.id} to={`/edit/${todo.id}`}>Edit this todo</Link> */}
+            <h2 onClick = { () => this.props.handleToggle(todo) }>{todo.task}</h2>
+            <button onClick = { () => this.props.handleDelete(todo) }>X</button>
             </div>
         </li>
         )

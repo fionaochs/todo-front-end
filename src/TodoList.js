@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import request from 'superagent'
-import { Link } from 'react-router-dom';
 import TodoItem from './TodoItem.js';
 import AddTodo from './AddTodo.js';
 
@@ -10,28 +9,26 @@ export default class TodoList extends Component {
         todos: [],
     }
 
-    async getTodos() {
-        const todoData = await request.get('https://sleepy-journey-35699.herokuapp.com/api/todos');
-        return todoData;
-    }
     async componentDidMount() {
-        const todoData = await this.getTodos();
+        const user = JSON.parse(localStorage.getItem('user'));
+        //get user from local storage
+        const todoData = await request.get('https://sleepy-journey-35699.herokuapp.com/api/todos')
+            .set('Authorization', user.token);
         this.setState({ todos: todoData.body });
+        console.log(todoData.body);
     }
 
     handleClick = async () => {
-        const newTodo = {
-            id: Math.random(),
-            todoInput: '',
-            task: this.state.todoInput,
-            complete: false
-        }
-        const newTodos = [...this.state.todos, newTodo];
-        //spread todos and insert newTodo
-        this.setState({ todos: newTodos })
+       
+        const user = JSON.parse(localStorage.getItem('user'));
+        console.log(user)
+        
         const data = await request.post('https://sleepy-journey-35699.herokuapp.com/api/todos', {
             task: this.state.todoInput
-        });
+        })
+        .set('Authorization', user.token);
+        this.setState({ todos: [...this.state.todos, data.body]})
+        ;
         //post new todo into db
         console.log(data.body);
 
@@ -39,7 +36,38 @@ export default class TodoList extends Component {
     handleInput  = e => {
         this.setState({todoInput: e.target.value})
     }
+    handleToggle = async (todo) => {
+        const newTodos = this.state.todos.slice();
+        const matchingTodo = newTodos.find((thisTodo) => todo.id === thisTodo.id);
+       
+        matchingTodo.complete = !todo.complete
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        this.setState({ todos: newTodos });
+         const data = await request.put(`https://sleepy-journey-35699.herokuapp.com/api/todos/${todo.id}`, matchingTodo)
+            .set('Authorization', user.token);
+    }
+    handleDelete = async (todo) => {
+        const newTodos = this.state.todos.slice();
+        const matchingTodo = newTodos.find((thisTodo) => todo.id === thisTodo.id);
+       
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        this.setState({ todos: newTodos });
+         const data = await request.delete(`https://sleepy-journey-35699.herokuapp.com/api/todos/${todo.id}`, matchingTodo)
+            .set('Authorization', user.token);
+
+            newTodos.splice(this.state.todos.findIndex(listItem => {
+                return listItem.id === todo.id
+            }), 1)
+            // findIndex loops through todos and finds one in list that matches the todo were passing in
+            //splice at that index and remove
+            //set new state
+            this.setState({todos: newTodos});
+            
+    }
     render() {
+        if (localStorage.getItem('user')) {
         return (
             <div id="todoContainer">
                 <AddTodo 
@@ -48,14 +76,16 @@ export default class TodoList extends Component {
                      handleInput={ this.handleInput }
                 />
                 
-                    
-                {this.state.todos.map(todo =>
-                    <Link key={todo.id} to={`/todos/${todo.id}`}>
-                    <TodoItem todo = {todo} />
-                    </Link>
+                {this.state.todos.map((todo) =>
+                    <TodoItem 
+                        handleToggle = { this.handleToggle }
+                        handleDelete = { this.handleDelete }
+                        todo = {todo} 
+                        complete={ this.state.complete }/>
                 )}
                 
             </div>
         )
     }
 }
+}      
